@@ -104,12 +104,13 @@ box2.value = 0.5 // これは出来そうだが、コンパイルエラーが起
 - 反変の場合は共変とは逆で、getterが削除されている
 
 ```kt
-func setDefault(box: MutableBox<in Number>) {
+func setDefault(box: MutableBox<in Int>) {
   box.value = 0
 }
 
-val box: MutableBox<Number> = MutableBox(NaN) // NanはDouble型である
-setDefault(box)
+val box: MutableBox<Number> = MutableBox(NaN) // NanはDouble型だが、Numberにキャストされる
+setDefault(box) // Intの引数にNumber型のBoxが渡されている
+println(box.value) // 0 (Number型)
 ```
 
 # 不変・共変・反変のまとめ
@@ -120,11 +121,100 @@ setDefault(box)
 - 共変は型Aと型Bのサブタイピングが成り立つ (出力のみ出来る)
 - 反変は型Aと型Bの逆のサブタイピングが成り立つ (入力のみ出来る)
 
-# 変位の指定
+# 型プロジェクション(2回目)
 
-// TODO: これから
+- 型の射影
+- キーワード out や in を使う
+- 「使用場所変位指定」と言うこともある
+- immutableな変数は変更出来ないのだから `out` パラメータは冗長なのでは？
 
+これに対して「宣言場所変位指定」を使う。
 
+# 宣言場所変位指定
+
+- 型パラメータを宣言する場所に `out` や `in` を使う
+- 危険な操作を公開するとコンパイルエラー
+
+```kt
+// ここで指定する
+class Box<out T>(val value: T)
+```
+
+# ジェネリック制約
+
+- 型引数として指定出来る型に制約を設ける
+- 制約とは、具体的には上限境界
+
+```kt
+// このクラスの型パラメータはNumber以下の型しか指定出来ない
+class NumberBox<out T: Number>(val value: T) {
+  func toInt(): NumberBox<Int> = 
+    NumberBox(value.toInt())
+}
+```
+
+# 複数の上限境界
+
+- whererキーワードを使う
+
+```kt
+// TODO: あとで書く
+```
+
+# 型消去
+
+```kt
+val box: Box<String> = Box("Hello"9
+val value: String = box.value
+```
+
+↓ コンパイル
+
+```java
+Box box = new Box("Hello");
+String value = (String) box.getValue(); // キャストが行われる
+```
+
+- 後方互換のため、Javaではジェネリクスの情報を削除している
+- その為、コンパイル後は型情報が失われる (型消去)
+- 型安全は人間の物なのでコンパイル後は型情報は必要無い (大抵の場合)
+- しかし、型チェックを行う場合は型情報が確定しないためエラーになる
+
+```kt
+// NG
+val object: Any = Box<Int>(123)
+if (object is Box<Int>) { ... }
+
+// OK
+val object: Any = Box<Int>(123)
+if (object is Box<*>) { ... } // * をスタープロジェクションと呼ぶ
+```
+
+# スタープロジェクション
+
+- 型が決まっているが、不明な時 or 興味が無い時に使用する
+- <out Any?> かつ <in Nothing>的に振る舞う
+- Any?はあらゆる型のスーパータイプとして振る舞い、Nothingはあらゆる型のサブタイプとなる
+
+```kt
+val list: MutableList<*> = MutableListOf<Int>()
+val value: Any? = list.get(0)
+list.add(123) // コンパイルエラー, Nothingの為
+```
+
+# 具象型(reified type)パラメータ付き関数
+
+- reified キーワードを使うと、コンパイル時も型情報を保つことが出来る
+
+```kt
+inline fun <reified T> Any.isA(): Boolean = this is T
+5.isA<Number>()
+```
+
+# まとめ
+
+任意の型に対して汎用的に安全なコード部品化を実現可能 (ジェネリクス)。
+ジェネリクス型を安全かつ柔軟に扱う為に変位と呼ばれる性質を利用する(不変, 共変, 反変)
 
 
 
