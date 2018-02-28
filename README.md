@@ -1,7 +1,7 @@
 # 概要
 
-これはエムスリー株式会社が開催しているKotlinジェネリクス勉強会の内容である。  
-[初学者向け「Kotlinでジェネリクスを学ぼう」](https://connpass.com/event/78536/)
+これはエムスリー株式会社が開催している [Kotlinジェネリクス勉強会](https://connpass.com/event/78536/) のメモである。  
+このメモの内容はほとんど [初学者向け「Kotlinでジェネリクスを学ぼう」](https://speakerdeck.com/ntaro/chu-xue-zhe-xiang-ke-kotlindezienerikusuwoxue-bou) から書き取った物なので、こちらを読んだほうが良いかもしれない。
 
 (このリポジトリにあるKotlinコードは特に何も書いてないです)
 
